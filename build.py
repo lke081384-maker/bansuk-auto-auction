@@ -232,7 +232,8 @@ def layout(page, title, desc, body, extra_ld=None, full_ld=False):
 <meta property="og:title" content="{title}">
 <meta property="og:description" content="{desc}">
 <meta property="og:url" content="{url}">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="{base}/assets/cars/224474710904.jpg">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{title}">
 <meta name="twitter:description" content="{desc}">
 <meta name="theme-color" content="#08301f">
@@ -286,7 +287,7 @@ def layout(page, title, desc, body, extra_ld=None, full_ld=False):
 </body>
 </html>
 """.format(
-        title=e(title), desc=e(desc), url=url, name=NAME, lds="\n".join(lds), mark=MARK, nav=nav,
+        title=e(title), desc=e(desc), url=url, name=NAME, base=BASE, lds="\n".join(lds), mark=MARK, nav=nav,
         kakao=KAKAO, phone=PHONE, phone_raw=PHONE_RAW, owner=OWNER, address=ADDRESS, blog=BLOG,
         checked=CHECKED.replace("-", "."), body=body,
         foot_nav="".join('<li><a href="%s">%s</a></li>' % (h, e(t)) for h, t in NAV),
@@ -326,14 +327,20 @@ def compare_html():
 
 
 def ledger_html(items):
+    """낙찰 사례 카드. 사진은 assets/cars/<글 번호>.jpg 가 있을 때만 넣는다."""
     out = []
     for d, fuel, car, note, no in items:
+        if (OUT / "assets" / "cars" / (no + ".jpg")).exists():
+            pic = ('<img src="assets/cars/%s.jpg" alt="경매장에서 찍은 %s 외관" width="640" height="480" loading="lazy">'
+                   % (no, e(car)))
+        else:
+            pic = '<div class="car-nopic" aria-hidden="true"><span>%s</span></div>' % e(car)
         out.append(
-            '<li><time datetime="%s">%s</time><span class="fuel">%s</span>'
-            '<h3>%s<small>%s</small></h3>'
+            '<li class="car">%s<div class="car-meta"><time datetime="%s">%s</time><span class="fuel">%s</span></div>'
+            '<h3>%s</h3><p>%s</p>'
             '<a href="%s/%s" target="_blank" rel="noopener" aria-label="%s 낙찰 글 블로그에서 보기">블로그 글 보기</a></li>'
-            % (d, d.replace("-", "."), e(fuel), e(car), e(note), BLOG, no, e(car)))
-    return '<ul class="ledger">%s</ul>' % "".join(out)
+            % (pic, d, d.replace("-", "."), e(fuel), e(car), e(note), BLOG, no, e(car)))
+    return '<ul class="cars">%s</ul>' % "".join(out)
 
 
 def bars_html():
@@ -451,7 +458,7 @@ def page_index():
   <div class="wrap">
     <div class="sec-head">
       <h2 id="h-cases">최근에 낙찰받은 차</h2>
-      <p>블로그에는 낙찰 사례 글이 1,282개 있습니다({checked} 기준). 고객과 주고받은 상담 내용과 차량 사진은 각 글에서 볼 수 있습니다.</p>
+      <p>블로그에는 낙찰 사례 글이 1,282개 있습니다({checked} 기준). 고객과 주고받은 상담 내용과 더 많은 사진은 각 글에서 볼 수 있습니다.</p>
     </div>
     {ledger}
     <p class="more"><a href="cases.html">낙찰 사례 더 보기</a></p>
@@ -618,14 +625,14 @@ def page_promise():
 
 
 def page_cases():
-    body = page_head("자동차경매 낙찰 사례", "최근 블로그에 올린 낙찰 사례입니다. 고객과 주고받은 상담 내용과 차량 사진은 각 글에서 볼 수 있습니다.") + """
+    body = page_head("자동차경매 낙찰 사례", "최근 블로그에 올린 낙찰 사례입니다. 고객과 주고받은 상담 내용과 더 많은 사진은 각 글에서 볼 수 있습니다.") + """
 <section class="sec sec-paper"><div class="wrap">
   <div class="sec-head">
     <h2>2026년 하반기 낙찰 사례</h2>
     <p>하이브리드, LPG, 전기, 수소, 디젤, 가솔린까지 연료 종류를 가리지 않고 대행합니다.</p>
   </div>
   {ledger}
-  <p class="note" style="margin-top:1.25rem">낙찰가는 블로그 글에 적힌 경우에만 옮겼습니다. 같은 차종이라도 연식, 주행거리, 상태, 시기에 따라 낙찰가가 달라집니다.</p>
+  <p class="note" style="margin-top:1.25rem">사진은 대표가 경매장에서 찍어 블로그에 올린 것이고, 번호판은 가렸습니다. 낙찰가는 블로그 글에 적힌 경우에만 옮겼습니다. 같은 차종이라도 연식, 주행거리, 상태, 시기에 따라 낙찰가가 달라집니다.</p>
 </div></section>
 
 <section class="sec"><div class="wrap two">
